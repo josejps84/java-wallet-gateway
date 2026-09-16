@@ -28,18 +28,18 @@ public class AccountServiceRoutes {
         return route("account-service")
                 .route(RequestPredicates.path("/api/accounts/**"), http())
                 .before(uri("http://"+host+":"+port))
-                .before(request -> {
-                    HttpServletRequest servletRequest = request.servletRequest();
-                    String authorization = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-
-                    log.info("Authorization header: {}", authorization);
-                    if (authorization != null && !authorization.isBlank()) {
-                        return ServerRequest.from(request)
-                                .header(HttpHeaders.AUTHORIZATION, authorization)
-                                .build();
-                    }
-                    return request;
-                })
+//                .before(request -> {
+//                    HttpServletRequest servletRequest = request.servletRequest();
+//                    String authorization = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+//
+//                    log.info("Authorization header: {}", authorization);
+//                    if (authorization != null && !authorization.isBlank()) {
+//                        return ServerRequest.from(request)
+//                                .header(HttpHeaders.AUTHORIZATION, authorization)
+//                                .build();
+//                    }
+//                    return request;
+//                })
                 .filter(authFilter)
                 .build();
     }

@@ -25,7 +25,8 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
     // Lista de rutas que saltarán la validación de JWT
     private static final Set<String> OPEN_API_ENDPOINTS = Set.of(
             "/api/users/login",
-            "/api/users/register"
+            "/api/users/register",
+            "/api/accounts/new"
     );
 
     // Lista de rutas que saltarán la validación de JWT
