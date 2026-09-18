@@ -30,8 +30,8 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
     );
 
     // Lista de rutas que saltarán la validación de JWT
-    private static final Set<String> INTERNAL_USER_ENDPOINTS = Set.of(
-            "/api/accounts"
+    private static final Set<String> ADMIN_USER_ENDPOINTS = Set.of(
+//            "/api/accounts"
     );
 
     // Constructor para inyección de dependencias
@@ -71,12 +71,11 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
     }
 
     private @Nullable ServerResponse isAuthorized(ServerRequest request, String path) {
-        // En WebMVC puedes acceder directamente al HttpServletRequest nativo si lo deseas
         HttpServletRequest servletRequest = request.servletRequest();
         String authHeader = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.info("Missing or invalid Authorization header for path: {}", path);
+            log.error("Missing or invalid Authorization header for path: {}", path);
             return ServerResponse.status(HttpStatus.UNAUTHORIZED)
                     .body("Falta el token o la cabecera Authorization es inválida");
         }
@@ -85,7 +84,7 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
         Result<Claims,AuthenticationResult> result = jwtUtil.validateToken(token);
 
         if (result instanceof Result.Failure<Claims, AuthenticationResult>(AuthenticationResult error)) {
-            log.info("Invalid token for path: {}. Error: {}", path, error);
+            log.error("Invalid token for path: {}. Error: {}", path, error);
             // Token inválido, puedes manejar el error según sea necesario
             return ServerResponse.status(HttpStatus.UNAUTHORIZED)
                     .body("Token no autorizado, modificado o expirado: " + error);
@@ -93,8 +92,8 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
             // Token válido, puedes extraer información del usuario si lo deseas
             String userType = claims.get("userType", String.class);
 
-            if (!UserType.ADMIN.name().equals(userType) && INTERNAL_USER_ENDPOINTS.stream().anyMatch(path::contains)) {
-                log.info("User type {} is not authorized to access path: {} userType: {}", userType, path);
+            if (!UserType.ADMIN.name().equals(userType) && ADMIN_USER_ENDPOINTS.stream().anyMatch(path::contains)) {
+                log.error("User type {} is not authorized to access path: {}", userType, path);
                 return ServerResponse.status(HttpStatus.UNAUTHORIZED)
                         .body("Token not authorized, modified or expired.");
             }
