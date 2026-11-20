@@ -14,13 +14,13 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 @Configuration
 public class AuthServiceRoutes {
 
+    /** Only login and registration are exposed publicly; anything else under /api/users is not routed. */
     @Bean
-    public RouterFunction<ServerResponse> authServiceResponse(
-            @Value("${auth.host}") String host,
-            @Value("${auth.port}") String port) {
+    public RouterFunction<ServerResponse> authServiceRoute(@Value("${auth.url}") String authUrl) {
         return route("auth-service")
-                .route(RequestPredicates.path("/api/users/**"), http())
-                .before(uri("http://"+host+":"+port))
+                .route(RequestPredicates.POST("/api/users/login").or(RequestPredicates.POST("/api/users/register")),
+                        http())
+                .before(uri(authUrl))
                 .build();
     }
 }
