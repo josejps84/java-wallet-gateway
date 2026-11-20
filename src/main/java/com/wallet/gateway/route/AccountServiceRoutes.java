@@ -1,7 +1,6 @@
 package com.wallet.gateway.route;
 
 import com.wallet.gateway.filter.AuthenticationFilter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,29 +13,15 @@ import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouter
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.http;
 
 @Configuration
-@Slf4j
 public class AccountServiceRoutes {
 
+    /** Every account endpoint requires a valid JWT. */
     @Bean
-    public RouterFunction<ServerResponse> accountServiceResponse(
-            AuthenticationFilter authFilter,
-            @Value("${account.host}") String host,
-            @Value("${account.port}") String port) {
+    public RouterFunction<ServerResponse> accountServiceRoute(AuthenticationFilter authFilter,
+                                                              @Value("${account.url}") String accountUrl) {
         return route("account-service")
                 .route(RequestPredicates.path("/api/accounts/**"), http())
-                .before(uri("http://"+host+":"+port))
-//                .before(request -> {
-//                    HttpServletRequest servletRequest = request.servletRequest();
-//                    String authorization = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-//
-//                    log.info("Authorization header: {}", authorization);
-//                    if (authorization != null && !authorization.isBlank()) {
-//                        return ServerRequest.from(request)
-//                                .header(HttpHeaders.AUTHORIZATION, authorization)
-//                                .build();
-//                    }
-//                    return request;
-//                })
+                .before(uri(accountUrl))
                 .filter(authFilter)
                 .build();
     }
